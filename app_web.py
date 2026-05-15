@@ -1,10 +1,16 @@
 import streamlit as st
 from database import *
 
+# ✅ CREA TABLAS AUTOMÁTICAMENTE (ARREGLA ERROR)
+crear_tablas()
+
 st.set_page_config(page_title="WAIPE", layout="centered")
 
 st.title("📱 WAIPE")
 
+# =========================
+# CONTROL DE PAGINAS
+# =========================
 if "pagina" not in st.session_state:
     st.session_state.pagina = "menu"
 
@@ -26,7 +32,7 @@ if st.session_state.pagina == "menu":
         st.session_state.pagina = "Entrega"
 
 # =========================
-# MATERIA
+# MATERIA PRIMA
 # =========================
 elif st.session_state.pagina == "Materia":
 
@@ -59,7 +65,6 @@ elif st.session_state.pagina == "Reparto":
     trabajadores = obtener_trabajadores_por_aldea(aldea)
     trabajadores = [t for t in trabajadores if t[0] not in (None,"","None")]
 
-    # ordenar por deuda
     trabajadores.sort(key=lambda x: x[1], reverse=True)
 
     nombres = [t[0] for t in trabajadores]
@@ -110,7 +115,6 @@ elif st.session_state.pagina == "Reparto":
             eliminar_trabajador(nombre)
             st.warning("🗑 Eliminado")
 
-    # ✅ LISTA CON COLORES
     st.subheader("📋 Lista de trabajadores")
 
     for n, p in trabajadores:
@@ -142,14 +146,11 @@ elif st.session_state.pagina == "Empaque":
 
         stock = obtener_empaque(tipo, waipe)
 
-        # 📦 GRANEL
         if tipo == "granel":
             guardar_empaque(tipo, waipe, cantidad)
-
             st.success("✅ Guardado correctamente")
             st.info(f"Bolsas: {stock} → {stock + cantidad}")
 
-        # ⚪ BOLEADO
         else:
             bolas_viejas = stock * 50
             bolas_nuevas = cantidad * 50
@@ -161,7 +162,6 @@ elif st.session_state.pagina == "Empaque":
 
     if st.button("Volver"):
         st.session_state.pagina = "menu"
-
 
 # =========================
 # ENTREGA
@@ -179,16 +179,12 @@ elif st.session_state.pagina == "Entrega":
 
         stock = obtener_empaque(tipo, waipe)
 
-        # 🔴 SIN STOCK
         if stock <= 0:
             st.error("❌ No hay stock disponible")
 
-        # =====================
-        # 📦 GRANEL
-        # =====================
         elif tipo == "granel":
 
-            disponible = stock  # bolsas
+            disponible = stock
 
             if cantidad > disponible:
                 st.error(f"❌ Solo tienes {disponible} bolsas disponibles")
@@ -201,12 +197,9 @@ elif st.session_state.pagina == "Entrega":
                 st.success(f"✅ Venta Q{total}")
                 st.info(f"Bolsas restantes: {disponible - cantidad}")
 
-        # =====================
-        # ⚪ BOLEADO
-        # =====================
         else:
 
-            disponible = stock * 50  # bolas
+            disponible = stock * 50
 
             if cantidad > disponible:
                 st.error(f"❌ Solo tienes {disponible} bolas disponibles")
